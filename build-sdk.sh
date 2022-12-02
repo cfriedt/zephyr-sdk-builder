@@ -100,11 +100,11 @@ install_dependencies() {
     # iputils-ping (apt) -> iputils (dnf)
     sudo dnf install ${YES} \
         gcc gcc-c++ gperf bison flex texinfo help2man make ncurses-devel \
-        platform-python-devel autoconf automake libtool libtool gawk wget bzip2 \
-        xz unzip patch libstdc++ diffstat make automake gcc gcc-c++ kernel-devel chrpath \
-        socat cpio python3 python3 python3-pip python3-pexpect \
+       	autoconf automake libtool libtool gawk wget bzip2 \
+        xz unzip patch libstdc++ libstdc++-static diffstat make automake gcc gcc-c++ kernel-devel chrpath \
+        socat cpio python3 python3-devel python3-pip \
         python3-setuptools  iputils ca-certificates \
-        ninja-build
+        ninja-build cmake which file
 
     # notable differences:
     # p7zip-full (apt) -> p7zip p7zip-plugins (dnf)
@@ -118,17 +118,9 @@ install_dependencies() {
 
     # needed to build host tools (required by Yocto)
     sudo dnf install ${YES} rpcgen
-}
 
-clean() {
-    # Clean up working directories
-    shopt -s dotglob
-    sudo rm -rf ${GITHUB_WORKSPACE}/*
-    sudo rm -rf ${WORKSPACE}/*
-    shopt -u dotglob
-}
+    # from setup_build_environment()
 
-set_up_build_environment() {
     # Install common dependencies
     # notable differences:
     # libboost-dev (apt) -> boost-devel (dnf)
@@ -140,12 +132,15 @@ set_up_build_environment() {
         autoconf automake bison flex gettext \
         help2man boost-devel boost-regex \
         ncurses-devel libtool libtool \
-        pkg-config texinfo zip
+        pkgconfig texinfo zip
+}
 
-    # Install dependencies for cross compilation
-    # TBD (focus on x86_64 package for now)
-
-    # e.g. set_up_buildenvironment_macOS
+clean() {
+    # Clean up working directories
+    shopt -s dotglob
+    sudo rm -rf ${GITHUB_WORKSPACE}/*
+    sudo rm -rf ${WORKSPACE}/*
+    shopt -u dotglob
 }
 
 check_out_source_code() {
@@ -336,15 +331,15 @@ generate_matrix() {
     MATRIX_TESTENVS+=']'
 
     # Escape control characters because GitHub Actions
-    MATRIX_HOSTS="${MATRIX_HOSTS//'%'/''}"
-    MATRIX_HOSTS="${MATRIX_HOSTS//$'\n'/''}"
-    MATRIX_HOSTS="${MATRIX_HOSTS//$'\r'/''}"
-    MATRIX_TARGETS="${MATRIX_TARGETS//'%'/''}"
-    MATRIX_TARGETS="${MATRIX_TARGETS//$'\n'/''}"
-    MATRIX_TARGETS="${MATRIX_TARGETS//$'\r'/''}"
-    MATRIX_TESTENVS="${MATRIX_TESTENVS//'%'/''}"
-    MATRIX_TESTENVS="${MATRIX_TESTENVS//$'\n'/''}"
-    MATRIX_TESTENVS="${MATRIX_TESTENVS//$'\r'/''}"
+#    MATRIX_HOSTS="${MATRIX_HOSTS//'%'/''}"
+#    MATRIX_HOSTS="${MATRIX_HOSTS//$'\n'/''}"
+#    MATRIX_HOSTS="${MATRIX_HOSTS//$'\r'/''}"
+#    MATRIX_TARGETS="${MATRIX_TARGETS//'%'/''}"
+#    MATRIX_TARGETS="${MATRIX_TARGETS//$'\n'/''}"
+#    MATRIX_TARGETS="${MATRIX_TARGETS//$'\r'/''}"
+#    MATRIX_TESTENVS="${MATRIX_TESTENVS//'%'/''}"
+#    MATRIX_TESTENVS="${MATRIX_TESTENVS//$'\n'/''}"
+#    MATRIX_TESTENVS="${MATRIX_TESTENVS//$'\r'/''}"
 
     # Remove trailing comma
     MATRIX_HOSTS=$(echo "${MATRIX_HOSTS}" | sed -zr 's/,([^,]*$)/\1/')
@@ -850,7 +845,7 @@ main() {
 
     local cmds="$COMMANDS"
     if [ "$cmds" = "" ]; then
-        cmds="deps clean prepare manifest build hosttools"
+        cmds="deps clean prepare manifest crosstool build hosttools"
     fi
 
     # deps
@@ -860,7 +855,6 @@ main() {
         else
             if [ $NO_DEPS -eq 0 ]; then
                 install_dependencies
-                set_up_build_environment
             fi
         fi
     fi
@@ -895,12 +889,20 @@ main() {
     fi
 
     # build
+    if [[ $cmds =~ .*crosstool.* ]]; then
+        if [ $DRY_RUN -gt 0 ]; then
+            echo "crosstool"
+        else
+            build_crosstool_ng
+            test_ct_ng
+        fi
+    fi
+
+    # build
     if [[ $cmds =~ .*build.* ]]; then
         if [ $DRY_RUN -gt 0 ]; then
             echo "build"
         else
-            build_crosstool_ng
-            test_ct_ng
             for matrix_host_name in $(echo ${MATRIX_HOSTS} | jq -r '.[].name'); do
                 for matrix_target in $(echo ${MATRIX_TARGETS} | jq -r '.[]'); do
                     for matrix_host_archive in $MATRIX_ARCHIVES; do

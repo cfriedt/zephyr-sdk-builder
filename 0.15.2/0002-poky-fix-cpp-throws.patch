@@ -1,0 +1,39 @@
+diff --git a/0.15.2/0002-poky-fix-cpp-throws.patch b/0.15.2/0002-poky-fix-cpp-throws.patch
+index e45229d..3410648 100644
+--- a/0.15.2/0002-poky-fix-cpp-throws.patch
++++ b/0.15.2/0002-poky-fix-cpp-throws.patch
+@@ -1,6 +1,6 @@
+ diff --git a/meta/recipes-devtools/mklibs/files/cpp-throws.patch b/meta/recipes-devtools/mklibs/files/cpp-throws.patch
+ new file mode 100644
+-index 0000000000..82704653e4
++index 0000000000..89e2ed1056
+ --- /dev/null
+ +++ b/meta/recipes-devtools/mklibs/files/cpp-throws.patch
+ @@ -0,0 +1,13 @@
+@@ -9,9 +9,9 @@ index 0000000000..82704653e4
+ +--- a/configure.ac
+ ++++ b/configure.ac
+ +@@ -7,6 +7,8 @@ AC_CANONICAL_HOST
+-+ 
+++
+ + AC_PROG_CXX
+-+ 
+++
+ ++CXXFLAGS="-std=gnu++98"
+ ++
+ + AC_CONFIG_FILES([
+@@ -22,10 +22,10 @@ index 1784af1f4c..c626f98cf1 100644
+ --- a/meta/recipes-devtools/mklibs/mklibs-native_0.1.44.bb
+ +++ b/meta/recipes-devtools/mklibs/mklibs-native_0.1.44.bb
+ @@ -12,6 +12,7 @@ SRC_URI = "http://snapshot.debian.org/archive/debian/20180828T214102Z/pool/main/
+-        file://avoid-failure-on-symbol-provided-by-application.patch \
+-        file://show-GNU-unique-symbols-as-provided-symbols.patch \
+-        file://fix_cross_compile.patch \
+-+       file://cpp-throws.patch \
++ 	file://avoid-failure-on-symbol-provided-by-application.patch \
++ 	file://show-GNU-unique-symbols-as-provided-symbols.patch \
++ 	file://fix_cross_compile.patch \
+++	file://cpp-throws.patch \
+  "
+  
+  SRC_URI[md5sum] = "6b6eeb9b4016c6a7317acc28c89e32cc"

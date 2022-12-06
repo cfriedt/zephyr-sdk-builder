@@ -1,0 +1,12 @@
+diff --git a/meta/recipes-devtools/elfutils/elfutils_0.180.bb b/meta/recipes-devtools/elfutils/elfutils_0.180.bb
+index 61e46a4ed7..5125d1908d 100644
+--- a/meta/recipes-devtools/elfutils/elfutils_0.180.bb
++++ b/meta/recipes-devtools/elfutils/elfutils_0.180.bb
+@@ -20,6 +20,7 @@ SRC_URI = "https://sourceware.org/elfutils/ftp/${PV}/${BP}.tar.bz2 \
+            file://run-ptest \
+            file://ptest.patch \
+            file://0001-tests-Makefile.am-compile-test_nlist-with-standard-C.patch \
++           file://0015-config-eu.am-do-not-use-Werror.patch \
+            "
+ SRC_URI_append_libc-musl = " \
+            file://0001-musl-obstack-fts.patch \

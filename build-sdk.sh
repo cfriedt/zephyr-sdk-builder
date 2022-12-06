@@ -86,6 +86,10 @@ install_dependencies() {
 
     # skipped some environment manipulation.. might be relevant
 
+    sudo dnf install -y 'dnf-command(config-manager)'
+    sudo dnf config-manager --set-enabled crb
+    sudo dnf makecache
+
     # The package sets are based on Yocto & crosstool-ng docs/references
     # notable differences:
     # g++ (apt) -> gcc-c++ (dnf)
@@ -101,14 +105,22 @@ install_dependencies() {
     sudo dnf install ${YES} \
         gcc gcc-c++ gperf bison flex texinfo help2man make ncurses-devel \
        	autoconf automake libtool libtool gawk wget bzip2 \
-        xz unzip patch libstdc++ libstdc++-static diffstat make automake gcc gcc-c++ kernel-devel chrpath \
+        xz unzip patch libstdc++ libstdc++-devel diffstat make automake gcc gcc-c++ kernel-devel chrpath \
         socat cpio python3 python3-devel python3-pip \
         python3-setuptools  iputils ca-certificates \
-        ninja-build cmake which file
+        ninja-build cmake which file jq
 
     # notable differences:
     # p7zip-full (apt) -> p7zip p7zip-plugins (dnf)
-    sudo dnf install ${YES} makeself tree curl p7zip p7zip-plugins
+    #sudo dnf install ${YES} makeself tree curl p7zip p7zip-plugins
+    # centos stream 9 apparently missing p7zip, p7zip-plugins, makeself
+    sudo dnf install ${YES} tree curl
+
+    # install makeself
+    curl -L -o /tmp/makeself.run 'https://github.com/megastep/makeself/releases/download/release-2.4.5/makeself-2.4.5.run'
+    chmod +x /tmp/makeself.run
+    /tmp/makeself.run --accept --nox11 --target /usr/bin || true
+    mv /usr/bin/makeself.sh /usr/bin/makeself
 
     # skip installation of awscli
 
@@ -711,21 +723,8 @@ parse_args() {
             NO_DEPS=1
             ;;
         -p | --python-version)
-            case "$2" in
-            python3.6)
-                PYTHON_VERSION="$2"
-                shift
-                ;;
-            list)
-                echo $DEFAULT_PYTHON_VERSION
-                exit 0
-                ;;
-            *)
-                >&2 echo "Unsupported python version: $2"
-                usage
-                exit 1
-                ;;
-            esac
+            PYTHON_VERSION="$2"
+            shift
             ;;
         -s | --host)
             case "$2" in

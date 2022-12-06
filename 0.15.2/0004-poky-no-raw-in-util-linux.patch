@@ -1,0 +1,13 @@
+diff --git a/meta/recipes-core/util-linux/util-linux_2.36.bb b/meta/recipes-core/util-linux/util-linux_2.36.bb
+index 2ad00ff0a5..ac60bda625 100644
+--- a/meta/recipes-core/util-linux/util-linux_2.36.bb
++++ b/meta/recipes-core/util-linux/util-linux_2.36.bb
+@@ -105,7 +105,7 @@ EXTRA_OECONF = "\
+     --enable-libuuid --enable-libblkid \
+     \
+     --enable-fsck --enable-kill --enable-last --enable-mesg \
+-    --enable-mount --enable-partx --enable-raw --enable-rfkill \
++    --enable-mount --enable-partx --disable-raw --enable-rfkill \
+     --enable-unshare --enable-write \
+     \
+     --disable-bfs --disable-chfn-chsh --disable-login \
